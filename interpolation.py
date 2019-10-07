@@ -2,9 +2,6 @@ import pandas as pd
 
 from random import randint
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
 
 class BilinearInterpolation:
 
@@ -182,56 +179,6 @@ class BilinearInterpolation:
                 q12 * (x2 - self.density) * (self.internal_energy - y1) +
                 q22 * (self.density - x1) * (self.internal_energy - y1)
                 ) / ((x2 - x1) * (y2 - y1) + 0.0)
-
-
-
-interpolation_file = pd.read_csv('/Users/scotthull/Desktop/FDPS_SPH_ScottHull/eos/granite.rho_u.csv')
-original_data_file = pd.read_csv('/Users/scotthull/Desktop/FDPS_SPH_ScottHull/eos/granite.table.csv')
-
-density_array = interpolation_file['Density (kg/m3)']
-energy_array = interpolation_file['Energy (J/kg)']
-temperature_array = interpolation_file['Temperature (K)']
-
-density = 5000
-internal_energy = 1.50e9
-
-b = BilinearInterpolation(density=density, internal_energy=internal_energy, density_array=density_array,
-                          internal_energy_array=energy_array, variable_array=temperature_array, interpolation_type='nearest neighbors')
-
-fig = plt.figure()
-ax = Axes3D(fig)
-ax.plot(density_array, energy_array, temperature_array, color='blue')
-ax.plot(original_data_file['Density (kg/m3)'], original_data_file['Energy (J/kg)'],
-           original_data_file['Temperature (K)'], color='red')
-ax.scatter(density, internal_energy, b.interpolate(), color='green', s=40)
-for i in b.points:
-    ax.scatter(i[0], i[1], i[2], color='purple', s=40)
-
-# for i in [randint(0, len(original_data_file['Density (kg/m3)'])) for i in range(0, 100)]:
-    # d = original_data_file['Density (kg/m3)'][i]
-    # e = original_data_file['Energy (J/kg)'][i]
-
-# for i in [randint(0, len(interpolation_file['Density (kg/m3)']) - 1) for i in range(0, 10)]:
-#     d = interpolation_file['Density (kg/m3)'][i]
-#     e = interpolation_file['Energy (J/kg)'][i]
-#
-#     r = BilinearInterpolation(density=d, internal_energy=e, density_array=density_array,
-#                                   internal_energy_array=energy_array, variable_array=temperature_array,
-#                               interpolation_type='nearest neighbors')
-#     ax.scatter(d, e, r.interpolate())
-
-# for index, i in enumerate(density_array):
-#     print(index, len(density_array))
-#     density = density_array[index]
-#     internal_energy = energy_array[index]
-#     b = BilinearInterpolation(density=density, internal_energy=internal_energy, density_array=density_array,
-#                               internal_energy_array=energy_array, variable_array=temperature_array)
-#     ax.scatter(density, internal_energy, b.interpolate(), color='green')
-ax.set_xlabel("Density (kg/m3)")
-ax.set_ylabel("Internal Energy (J/kg)")
-ax.set_zlabel("Temperature (K)")
-
-plt.show()
 
 
 
