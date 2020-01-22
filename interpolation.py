@@ -6,7 +6,7 @@ from random import randint
 class BilinearInterpolation:
 
     def __init__(self, density_array, internal_energy_array, variable_array, density, internal_energy,
-                 interpolation_type):
+                 interpolation_type, calculated=False):
 
         self.density_array = density_array
         self.internal_energy_array = internal_energy_array
@@ -14,7 +14,8 @@ class BilinearInterpolation:
         self.density = density
         self.internal_energy = internal_energy
 
-        self.variable_matrix = self.matrix_variable()
+        if not calculated:
+            self.variable_matrix = self.matrix_variable()
         if interpolation_type.lower() == 'boundaries':
             self.points = self.getBoundaries()
         else:
@@ -351,5 +352,195 @@ class EntropyBilinearInterpolation:
                 q22 * (self.density - x1) * (self.entropy - y1)
                 ) / ((x2 - x1) * (y2 - y1) + 0.0)
 
+
+
+class EnergyInterpolation:
+
+    def __init__(self, density_array, entropy_array, energy_array, density, entropy, grid_length=120):
+        self.density = density
+        self.entropy = entropy
+        self.density_array = density_array
+        self.entropy_array = entropy_array
+        self.energy_array = energy_array
+        self.grid_length = grid_length
+
+    def restrict_density_indices_to_single_density(self, density_array, given_density, bound='lower'):
+        """
+        Gets the bounds on 3 values for the purpose of interpolating entropy when given the ordered density array.
+        :param density_array:
+        :param given_density:
+        :return:
+        """
+        b1 = None
+        b2 = None
+
+        if not bound == 'lower':
+            for index, i in enumerate(density_array):
+                if i > given_density:
+                    b1 = index
+                    b2 = index + self.grid_length
+                    if b2 > len(density_array) - 1:
+                        b2 = len(density_array) - 1
+                    break
+        else:
+            for index, i in enumerate(reversed(density_array)):
+                if i < given_density:
+                    b2 = len(density_array) - (index - 1) - self.grid_length - 1
+                    b1 = len(density_array) - (index) - (2 * self.grid_length)
+                    if b1 < 0:
+                        b1 = 0
+                    if b2 == 0:
+                        b2 = self.grid_length
+                    break
+        if b1 is None and b2 is None:
+            b1 = 0
+            b2 = self.grid_length
+        return b1, b2
+
+    def calc_distance(self, given, sample):
+        """
+        A simple function for calculating directional distances between a given value and a sample value.
+        :param given:
+        :param sample:
+        :return:
+        """
+        distance = given - sample
+        return distance
+
+    def get_entropy_neighbors(self, restriced_indices):
+        """
+        Get the nearest entropy neighbors to a given entropy value in a restricted array.
+        :param d1_indices:
+        :param d2_indices:
+        :param self.entropy_array:
+        :param self.entropy:
+        :return:
+        """
+
+        entropy_array_restricted = self.entropy_array[restriced_indices[0]:restriced_indices[1]]
+
+        min_distance = None
+        min_distance_index = None
+
+        for index, i in enumerate(entropy_array_restricted):
+            distance = self.calc_distance(given=self.entropy, sample=i)
+            if min_distance is None:
+                min_distance = distance
+                min_distance_index = index
+            elif abs(distance) < abs(min_distance):
+                min_distance = distance
+                min_distance_index = index
+        if min_distance < 0:
+            if min_distance_index <= 0:
+                return (min_distance_index, min_distance_index + 1)
+            elif min_distance_index + 1 == self.grid_length:
+                return (min_distance_index - 2, min_distance_index - 1)
+            return (min_distance_index - 1, min_distance_index)
+        elif min_distance > 0:
+            if min_distance_index + 1 == self.grid_length:
+                return (min_distance_index - 2, min_distance_index - 1)
+            return (min_distance_index, min_distance_index + 1)
+        else:
+            if min_distance_index >= self.grid_length - 1:
+                return (min_distance_index - 2, min_distance_index - 1)
+            elif min_distance_index < 0:
+                return (min_distance_index + 1, min_distance_index + 2)
+            return (min_distance_index - 1, min_distance_index + 1)
+
+    def get_energy_neighbor_values(self, s11, s12, s21, s22, lower_density_restricted_indices,
+                                   upper_density_restricted_indices):
+        """
+        Get the 4 nearest energy values
+        s11: the index position of the lower entropy neighbor at density d1
+        s12: the index position of the upper entropy neighbor at density d1
+        s21: the index position of the lower entropy neighbor at density d2
+        s2: the index position of the upper entropy neighbor at density d2
+        :param s11:
+        :param s12:
+        :param s21:
+        :param s22:
+        :param self.energy_array:
+        :return:
+        """
+
+        e11 = self.energy_array[lower_density_restricted_indices[0]:lower_density_restricted_indices[1]][s11]
+        e12 = self.energy_array[lower_density_restricted_indices[0]:lower_density_restricted_indices[1]][s12]
+        e21 = self.energy_array[upper_density_restricted_indices[0]:upper_density_restricted_indices[1]][s21]
+        e22 = self.energy_array[upper_density_restricted_indices[0]:upper_density_restricted_indices[1]][s22]
+
+        return (e11, e12, e21, e22)
+
+    def bilinear_interpolate(self, x1, x2, x, y1, y2, y, q11, q12, q21, q22):
+        f1 = (((x2 - x) / (x2 - x1)) * q11) + (((x - x1) / (x2 - x1)) * q21)
+        f2 = (((x2 - x) / (x2 - x1)) * q12) + (((x - x1) / (x2 - x1)) * q22)
+        f = (((y2 - y) / (y2 - y1)) * f1) + (((y - y1) / (y2 - y1)) * f2)
+        return f
+
+    def linear_interpolate(self, x1, x2, x, q1, q2):
+        f = (((x2 - x) / (x2 - x1)) * q1) + (((x2 - x) / (x2 - x1)) * q2)
+        return f
+
+    def restrict(self):
+
+        # now, given that we'll have energy values within a range of a single density in df, we must restrict the density array
+        # the following 2 functions will return the 'upper' and 'lower' nearest neighbor index ranges to given_density
+        # we can use these to restrict the arrays to within these index ranges
+        # d1 indices will give the index range for density which gives the 'lower' nearest neighbor
+        # d2 indices will give the index range for density which gives the 'upper' nearest neighbor
+        d1_indices = self.restrict_density_indices_to_single_density(density_array=self.density_array, given_density=self.density,
+                                                                bound='lower')
+        d2_indices = self.restrict_density_indices_to_single_density(density_array=self.density_array, given_density=self.density,
+                                                                bound='upper')
+
+        # now, restrict the density array based on d1_indices and d2_indices
+        density_1_array = self.density_array[d1_indices[0]:d1_indices[1]]
+        density_2_array = self.density_array[d2_indices[0]:d2_indices[1]]
+
+        # we will restrict the entropy array also based on the index ranges given by d1_indices and d2_indices
+        # the following 2 functions will return the nearest entropy neighbors to given_entropy with the restricted upper and lower array
+        lower_entropy_neighbors = self.get_entropy_neighbors(restriced_indices=d1_indices)
+        upper_entropy_neighbors = self.get_entropy_neighbors(restriced_indices=d2_indices)
+
+        # because we need nearest energy neighbors for interpolation, we get the energy values at the same index location as the entropy values
+        energy_neighbors = self.get_energy_neighbor_values(s11=lower_entropy_neighbors[0], s12=lower_entropy_neighbors[1],
+                                                      s21=upper_entropy_neighbors[0], s22=upper_entropy_neighbors[1],
+                                                      lower_density_restricted_indices=d1_indices,
+                                                      upper_density_restricted_indices=d2_indices)
+
+        # package the neighbor values up for use for interpolation
+        density_neighbor_values = (self.density_array[d1_indices[0]:d1_indices[1]][0], self.density_array[d2_indices[0]:d2_indices[1]][0])
+        restricted_entropy_array_lower = self.entropy_array[d1_indices[0]:d1_indices[1]]
+        restricted_entropy_array_upper = self.entropy_array[d2_indices[0]:d2_indices[1]]
+        entropy_neighbor_values = (restricted_entropy_array_lower[lower_entropy_neighbors[0]],
+                                   restricted_entropy_array_lower[lower_entropy_neighbors[1]],
+                                   restricted_entropy_array_upper[upper_entropy_neighbors[0]],
+                                   restricted_entropy_array_upper[upper_entropy_neighbors[1]])
+
+        return (density_neighbor_values, entropy_neighbor_values, energy_neighbors)
+
+    def interpolate(self):
+
+        r = self.restrict()
+
+        density_neighbor_values = r[0]
+        entropy_neighbor_values = r[1]
+        energy_neighbor_values = r[2]
+
+        p1 = density_neighbor_values[0]
+        p2 = density_neighbor_values[1]
+        s11 = entropy_neighbor_values[0]
+        s12 = entropy_neighbor_values[1]
+        s21 = entropy_neighbor_values[2]
+        s22 = entropy_neighbor_values[3]
+        u11 = energy_neighbor_values[0]
+        u12 = energy_neighbor_values[1]
+        u21 = energy_neighbor_values[2]
+        u22 = energy_neighbor_values[3]
+
+        u1 = self.linear_interpolate(x1=s11, x2=s12, x=self.entropy, q1=u11, q2=u12)
+        u2 = self.linear_interpolate(x1=s21, x2=s22, x=self.entropy, q1=u21, q2=u22)
+        u = self.linear_interpolate(x1=p1, x2=p2, x=self.density, q1=u1, q2=u2)
+
+        return u
 
 
