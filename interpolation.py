@@ -385,8 +385,10 @@ class EnergyInterpolation:
         else:
             for index, i in enumerate(reversed(density_array)):
                 if i < given_density:
-                    b2 = len(density_array) - (index - 1) - self.grid_length - 1
-                    b1 = len(density_array) - (index) - (2 * self.grid_length)
+                    # b2 = len(var1_array) - (index - 1) - self.grid_length - 1
+                    # b1 = len(var1_array) - (index) - (2 * self.grid_length)
+                    b1 = (len(density_array) - 1) - index - (self.grid_length - 1)
+                    b2 = b1 + self.grid_length
                     if b1 < 0:
                         b1 = 0
                     if b2 == 0:
@@ -578,7 +580,6 @@ class GenericTrilinearInterpolation:
         else:
             for index, i in enumerate(reversed(var1_array)):
                 if i < given_var1:
-                    print(index, i)
                     # b2 = len(var1_array) - (index - 1) - self.grid_length - 1
                     # b1 = len(var1_array) - (index) - (2 * self.grid_length)
                     b1 = (len(var1_array) - 1) - index - (self.grid_length - 1)
@@ -688,10 +689,6 @@ class GenericTrilinearInterpolation:
         d2_indices = self.restrict_var1_indices_to_single_var1(var1_array=self.var1_array, given_var1=self.var1,
                                                                 bound='upper')
 
-        print(d1_indices, d2_indices)
-        print(set(self.var1_array[d1_indices[0]:d1_indices[1]]))
-        print(set(self.var1_array[d2_indices[0]:d2_indices[1]]))
-
         # now, restrict the var1 array based on d1_indices and d2_indices
         var1_1_array = self.var1_array[d1_indices[0]:d1_indices[1]]
         var1_2_array = self.var1_array[d2_indices[0]:d2_indices[1]]
@@ -726,11 +723,6 @@ class GenericTrilinearInterpolation:
         var2_neighbor_values = r[1]
         var3_neighbor_values = r[2]
 
-        print(self.var1, self.var2)
-        print("var 1 neighbors: {}".format(var1_neighbor_values))
-        print("var 2 neighbors: {}".format(var2_neighbor_values))
-        print("var 3 neighbors: {}".format(var3_neighbor_values))
-
         p1 = var1_neighbor_values[0]
         p2 = var1_neighbor_values[1]
         s11 = var2_neighbor_values[0]
@@ -742,8 +734,20 @@ class GenericTrilinearInterpolation:
         u21 = var3_neighbor_values[2]
         u22 = var3_neighbor_values[3]
 
+        # u1 = self.linear_interpolate(x1=s11, x2=s12, x=self.var2, q1=u11, q2=u12)
+        # u2 = self.linear_interpolate(x1=s21, x2=s22, x=self.var2, q1=u21, q2=u22)
+        # u = self.linear_interpolate(x1=p1, x2=p2, x=self.var1, q1=u1, q2=u2)
+
         u1 = self.linear_interpolate(x1=s11, x2=s12, x=self.var2, q1=u11, q2=u12)
         u2 = self.linear_interpolate(x1=s21, x2=s22, x=self.var2, q1=u21, q2=u22)
         u = self.linear_interpolate(x1=p1, x2=p2, x=self.var1, q1=u1, q2=u2)
+
+        print("***************")
+        print(self.var1)
+        print(self.var2)
+        print("var1 neighbors: {}".format(var1_neighbor_values))
+        print("var2 neighbors: {}".format(var2_neighbor_values))
+        print("var3 neighbors: {}".format(var3_neighbor_values))
+        print(u)
 
         return u

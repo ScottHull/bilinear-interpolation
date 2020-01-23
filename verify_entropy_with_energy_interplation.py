@@ -4,9 +4,9 @@ from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-df = pd.read_fwf("/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/bilinear-interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
+df = pd.read_fwf("/Users/scotthull/PycharmProjects/bilinear_interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
 
-test_file = "/Users/scotthull/Desktop/results.00001_00001_00000.dat"
+test_file = "/Users/scotthull/Documents/FDPS_SPH/test2/results.00001_00001_00000.dat"
 test_df = pd.read_csv(test_file, sep='\t', header=None)
 
 density = list(df[0])  # load in the full-length density array from df
@@ -33,6 +33,7 @@ for index, i in enumerate(test_df[1]):
     id = test_df[1][index]
     d = test_df[9][index]
     u = test_df[10][index]
+    s = test_df[13][index]
     #
     # model = GenericTrilinearInterpolation(var1_array=density, var2_array=entropy, var3_array=energy,
     #                             var1=d, var2=3000, grid_length=120)
@@ -44,9 +45,10 @@ for index, i in enumerate(test_df[1]):
         interpolated_u.append(u)
 
         verify_model = GenericTrilinearInterpolation(var1_array=density, var2_array=energy, var3_array=entropy,
-                                                     var1=d, var2=u, grid_length=120)
+                                                     var1=2390.27342, var2=5429700.626766, grid_length=120)
 
         s_ver = verify_model.interpolate()
+        sample_s.append(s)
         verify_s.append(s_ver)
 
 
@@ -109,13 +111,13 @@ ax.set_zlabel("Interpolated Entropy")
 # ax4.set_title("Verified S Error")
 # ax4.grid()
 
-# fig5 = plt.figure()
-# ax5 = fig5.add_subplot(111)
-# n, bins, patches = ax3.hist([(abs(x - y)) / y for x, y in zip(verify_s, sample_s)])
-# ax5.set_xlabel("Interpolated U")
-# ax5.set_ylabel("abs(s_verified - s_sample) / s_sample")
-# ax5.set_title("Verified S Error")
-# ax5.grid()
+fig5 = plt.figure()
+ax5 = fig5.add_subplot(111)
+n, bins, patches = ax5.hist([(abs(x - y)) / y for x, y in zip(verify_s, sample_s)], 100, range=(0, 4))
+ax5.set_xlabel("abs(s_verified - s_sample) / s_sample")
+ax5.set_ylabel("Number")
+ax5.set_title("Verified S Error")
+ax5.grid()
 
 # fig = plt.figure()
 # ax = Axes3D(fig)
