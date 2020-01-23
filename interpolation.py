@@ -6,7 +6,7 @@ from random import randint
 class BilinearInterpolation:
 
     def __init__(self, density_array, internal_energy_array, variable_array, density, internal_energy,
-                 interpolation_type, calculated=False):
+                 interpolation_type="nearest_neighbors", calculated=False):
 
         self.density_array = density_array
         self.internal_energy_array = internal_energy_array
@@ -559,6 +559,23 @@ class GenericTrilinearInterpolation:
         self.var3_array = var3_array
         self.grid_length = grid_length
 
+        self.var1_neighbors = None
+        self.var2_neighbors = None
+        self.var3_neighbors = None
+
+        self.p1 = None
+        self.p2 = None
+        self.s11 = None
+        self.s12 = None
+        self.s21 = None
+        self.s22 = None
+        self.u11 = None
+        self.u12 = None
+        self.u21 = None
+        self.u22 = None
+        self.u1 = None
+        self.u2 = None
+
     def restrict_var1_indices_to_single_var1(self, var1_array, given_var1, bound='lower'):
         """
         Gets the bounds on 3 values for the purpose of interpolating var2 when given the ordered var1 array.
@@ -723,24 +740,24 @@ class GenericTrilinearInterpolation:
         var2_neighbor_values = r[1]
         var3_neighbor_values = r[2]
 
-        p1 = var1_neighbor_values[0]
-        p2 = var1_neighbor_values[1]
-        s11 = var2_neighbor_values[0]
-        s12 = var2_neighbor_values[1]
-        s21 = var2_neighbor_values[2]
-        s22 = var2_neighbor_values[3]
-        u11 = var3_neighbor_values[0]
-        u12 = var3_neighbor_values[1]
-        u21 = var3_neighbor_values[2]
-        u22 = var3_neighbor_values[3]
+        self.var1_neighbors = var1_neighbor_values
+        self.var2_neighbors = var2_neighbor_values
+        self.var3_neighbors = var3_neighbor_values
 
-        # u1 = self.linear_interpolate(x1=s11, x2=s12, x=self.var2, q1=u11, q2=u12)
-        # u2 = self.linear_interpolate(x1=s21, x2=s22, x=self.var2, q1=u21, q2=u22)
-        # u = self.linear_interpolate(x1=p1, x2=p2, x=self.var1, q1=u1, q2=u2)
+        self.p1 = var1_neighbor_values[0]
+        self.p2 = var1_neighbor_values[1]
+        self.s11 = var2_neighbor_values[0]
+        self.s12 = var2_neighbor_values[1]
+        self.s21 = var2_neighbor_values[2]
+        self.s22 = var2_neighbor_values[3]
+        self.u11 = var3_neighbor_values[0]
+        self.u12 = var3_neighbor_values[1]
+        self.u21 = var3_neighbor_values[2]
+        self.u22 = var3_neighbor_values[3]
 
-        u1 = self.linear_interpolate(x1=s11, x2=s12, x=self.var2, q1=u11, q2=u12)
-        u2 = self.linear_interpolate(x1=s21, x2=s22, x=self.var2, q1=u21, q2=u22)
-        u = self.linear_interpolate(x1=p1, x2=p2, x=self.var1, q1=u1, q2=u2)
+        self.u1 = self.linear_interpolate(x1=self.s11, x2=self.s12, x=self.var2, q1=self.u11, q2=self.u12)
+        self.u2 = self.linear_interpolate(x1=self.s21, x2=self.s22, x=self.var2, q1=self.u21, q2=self.u22)
+        u = self.linear_interpolate(x1=self.p1, x2=self.p2, x=self.var1, q1=self.u1, q2=self.u2)
 
         print("***************")
         print(self.var1)

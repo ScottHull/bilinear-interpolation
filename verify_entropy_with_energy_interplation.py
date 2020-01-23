@@ -1,12 +1,12 @@
-from interpolation import GenericTrilinearInterpolation
+from interpolation import GenericTrilinearInterpolation, BilinearInterpolation
 import pandas as pd
 from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-df = pd.read_fwf("/Users/scotthull/PycharmProjects/bilinear_interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
+df = pd.read_fwf("/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/bilinear-interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
 
-test_file = "/Users/scotthull/Documents/FDPS_SPH/test2/results.00001_00001_00000.dat"
+test_file = "/Users/scotthull/Desktop/results.00001_00001_00000.dat"
 test_df = pd.read_csv(test_file, sep='\t', header=None)
 
 density = list(df[0])  # load in the full-length density array from df
@@ -44,8 +44,10 @@ for index, i in enumerate(test_df[1]):
         sample_u.append(u)
         interpolated_u.append(u)
 
-        verify_model = GenericTrilinearInterpolation(var1_array=density, var2_array=energy, var3_array=entropy,
-                                                     var1=2390.27342, var2=5429700.626766, grid_length=120)
+        # verify_model = GenericTrilinearInterpolation(var1_array=density, var2_array=energy, var3_array=entropy,
+        #                                              var1=2390.27342, var2=5429700.626766, grid_length=120)
+        verify_model = BilinearInterpolation(density_array=density, internal_energy_array=energy, variable_array=entropy,
+                                             density=d, internal_energy=u)
 
         s_ver = verify_model.interpolate()
         sample_s.append(s)
