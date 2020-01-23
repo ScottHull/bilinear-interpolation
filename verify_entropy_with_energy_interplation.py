@@ -4,9 +4,9 @@ from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-df = pd.read_fwf("/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/bilinear-interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
+df = pd.read_fwf("/Users/scotthull/PycharmProjects/bilinear_interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
 
-test_file = "/Users/scotthull/Desktop/results.00001_00001_00000.dat"
+test_file = "/Users/scotthull/Documents/FDPS_SPH/test2/results.00001_00001_00000.dat"
 test_df = pd.read_csv(test_file, sep='\t', header=None)
 
 density = list(df[0])  # load in the full-length density array from df
@@ -44,10 +44,10 @@ for index, i in enumerate(test_df[1]):
         sample_u.append(u)
         interpolated_u.append(u)
 
-        # verify_model = GenericTrilinearInterpolation(var1_array=density, var2_array=energy, var3_array=entropy,
-        #                                              var1=2390.27342, var2=5429700.626766, grid_length=120)
-        verify_model = BilinearInterpolation(density_array=density, internal_energy_array=energy, variable_array=entropy,
-                                             density=d, internal_energy=u)
+        verify_model = GenericTrilinearInterpolation(var1_array=density, var2_array=energy, var3_array=entropy,
+                                                     var1=d, var2=u, grid_length=120)
+        # verify_model = BilinearInterpolation(density_array=density, internal_energy_array=energy, variable_array=entropy,
+        #                                      density=d, internal_energy=u)
 
         s_ver = verify_model.interpolate()
         sample_s.append(s)
@@ -74,6 +74,23 @@ ax.set_xlabel("Sample Density")
 ax.set_ylabel("Sample Energy")
 ax.set_zlabel("Interpolated Entropy")
 
+fig3 = plt.figure()
+ax3_1 = fig3.add_subplot(311)
+ax3_2 = fig3.add_subplot(312)
+ax3_3 = fig3.add_subplot(313)
+ax3_1.scatter(sample_d, [(abs(x - y)) / y for x, y in zip(verify_s, sample_s)], color='black')
+ax3_2.scatter(sample_u, [(abs(x - y)) / y for x, y in zip(verify_s, sample_s)], color='black')
+ax3_3.scatter(sample_s, [(abs(x - y)) / y for x, y in zip(verify_s, sample_s)], color='black')
+ax3_1.set_xlabel("Sample Density")
+ax3_2.set_xlabel("Sample Energy")
+ax3_3.set_xlabel("Sample Entropy")
+ax3_1.set_ylabel("S_interp Error")
+ax3_2.set_ylabel("S_interp Error")
+ax3_3.set_ylabel("S_interp Error")
+ax3_1.set_title("Verify Entropy Interpolation")
+ax3_1.grid()
+ax3_2.grid()
+ax3_3.grid()
 
 
 
