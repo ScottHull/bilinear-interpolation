@@ -4,9 +4,9 @@ from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-df = pd.read_fwf("/Users/scotthull/PycharmProjects/bilinear_interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
+df = pd.read_fwf("/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/bilinear-interpolation/granite.rho_u.txt", header=None)  # load in the granite.rho_u.txt file
 
-test_file = "/Users/scotthull/Documents/FDPS_SPH/test2/results.00001_00001_00000.dat"
+test_file = "/Users/scotthull/Desktop/results.00001_00001_00000.dat"
 test_df = pd.read_csv(test_file, sep='\t', header=None)
 
 density = list(df[0])  # load in the full-length density array from df

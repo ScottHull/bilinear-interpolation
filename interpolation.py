@@ -578,8 +578,11 @@ class GenericTrilinearInterpolation:
         else:
             for index, i in enumerate(reversed(var1_array)):
                 if i < given_var1:
-                    b2 = len(var1_array) - (index - 1) - self.grid_length - 1
-                    b1 = len(var1_array) - (index) - (2 * self.grid_length)
+                    print(index, i)
+                    # b2 = len(var1_array) - (index - 1) - self.grid_length - 1
+                    # b1 = len(var1_array) - (index) - (2 * self.grid_length)
+                    b1 = (len(var1_array) - 1) - index - (self.grid_length - 1)
+                    b2 = b1 + self.grid_length
                     if b1 < 0:
                         b1 = 0
                     if b2 == 0:
@@ -685,6 +688,10 @@ class GenericTrilinearInterpolation:
         d2_indices = self.restrict_var1_indices_to_single_var1(var1_array=self.var1_array, given_var1=self.var1,
                                                                 bound='upper')
 
+        print(d1_indices, d2_indices)
+        print(set(self.var1_array[d1_indices[0]:d1_indices[1]]))
+        print(set(self.var1_array[d2_indices[0]:d2_indices[1]]))
+
         # now, restrict the var1 array based on d1_indices and d2_indices
         var1_1_array = self.var1_array[d1_indices[0]:d1_indices[1]]
         var1_2_array = self.var1_array[d2_indices[0]:d2_indices[1]]
@@ -718,6 +725,11 @@ class GenericTrilinearInterpolation:
         var1_neighbor_values = r[0]
         var2_neighbor_values = r[1]
         var3_neighbor_values = r[2]
+
+        print(self.var1, self.var2)
+        print("var 1 neighbors: {}".format(var1_neighbor_values))
+        print("var 2 neighbors: {}".format(var2_neighbor_values))
+        print("var 3 neighbors: {}".format(var3_neighbor_values))
 
         p1 = var1_neighbor_values[0]
         p2 = var1_neighbor_values[1]
