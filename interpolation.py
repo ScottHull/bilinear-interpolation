@@ -685,13 +685,15 @@ class GenericTrilinearInterpolation:
         return (e11, e12, e21, e22)
 
     def bilinear_interpolate(self, x1, x2, x, y1, y2, y, q11, q12, q21, q22):
-        f1 = (((x2 - x) / (x2 - x1)) * q11) + (((x - x1) / (x2 - x1)) * q21)
-        f2 = (((x2 - x) / (x2 - x1)) * q12) + (((x - x1) / (x2 - x1)) * q22)
-        f = (((y2 - y) / (y2 - y1)) * f1) + (((y - y1) / (y2 - y1)) * f2)
+        f = (q11 * (x2 - self.var1) * (y2 - self.var2) +
+                q21 * (self.var1 - x1) * (y2 - self.var2) +
+                q12 * (x2 - self.var1) * (self.var2 - y1) +
+                q22 * (self.var1 - x1) * (self.var2 - y1)
+                ) / ((x2 - x1) * (y2 - y1) + 0.0)
         return f
 
     def linear_interpolate(self, x1, x2, x, q1, q2):
-        f = (((x2 - x) / (x2 - x1)) * q1) + (((x2 - x) / (x2 - x1)) * q2)
+        f = (((x2 - x) / (x2 - x1)) * q1) + (((x - x1) / (x2 - x1)) * q2)
         return f
 
     def restrict(self):
@@ -759,12 +761,14 @@ class GenericTrilinearInterpolation:
         self.u2 = self.linear_interpolate(x1=self.s21, x2=self.s22, x=self.var2, q1=self.u21, q2=self.u22)
         u = self.linear_interpolate(x1=self.p1, x2=self.p2, x=self.var1, q1=self.u1, q2=self.u2)
 
-        print("***************")
-        print(self.var1)
-        print(self.var2)
-        print("var1 neighbors: {}".format(var1_neighbor_values))
-        print("var2 neighbors: {}".format(var2_neighbor_values))
-        print("var3 neighbors: {}".format(var3_neighbor_values))
-        print(u)
+
+        # print("***************")
+        # print(self.var1)
+        # print(self.var2)
+        # print(self.u1, self.u2)
+        # print("var1 neighbors: {}".format(var1_neighbor_values))
+        # print("var2 neighbors: {}".format(var2_neighbor_values))
+        # print("var3 neighbors: {}".format(var3_neighbor_values))
+        # print(u)
 
         return u
