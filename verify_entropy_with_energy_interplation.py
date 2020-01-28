@@ -39,7 +39,7 @@ for index, i in enumerate(test_df[1]):
     #                             var1=d, var2=3000, grid_length=120)
     # u = model.interpolate()
 
-    if u > 0 and i == 0:
+    if i != 1:
         sample_d.append(d)
         sample_u.append(u)
         interpolated_u.append(u)
@@ -132,7 +132,7 @@ ax3_3.grid()
 
 fig5 = plt.figure()
 ax5 = fig5.add_subplot(111)
-n, bins, patches = ax5.hist([(abs(x - y)) / y for x, y in zip(verify_s, sample_s)], 100, range=(0, 0.5))
+n, bins, patches = ax5.hist([(abs(x - y)) / y for x, y in zip(verify_s, sample_s)], 100, range=(0, 0.001))
 ax5.set_xlabel("abs(s_verified - s_sample) / s_sample")
 ax5.set_ylabel("Number")
 ax5.set_title("Verified S Error")
