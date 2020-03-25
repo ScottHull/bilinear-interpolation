@@ -26,7 +26,7 @@ for index, i in enumerate(test_df[1]):
     s = test_df[13][index]
     sample_s_val = 3000
 
-    if id == 0:
+    if id == 0 or id == 1:
         interp_u = GenericTrilinearInterpolation(var1_array=density, var2_array=entropy, var3_array=energy,
                                                  var1=d, var2=sample_s_val, grid_length=120).interpolate()
 
