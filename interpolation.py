@@ -153,10 +153,8 @@ class BilinearInterpolation:
 
         '''
         Interpolate (x,y) from values associated with four points.
-
         The four points are a list of four triplets:  (x, y, value).
         The four points can be in any order.  They should form a rectangle.
-
         >>> bilinear_interpolation(12, 5.5,
         ...                        [(10, 4, 100),
         ...                         (20, 4, 200),
@@ -324,10 +322,8 @@ class EntropyBilinearInterpolation:
 
         '''
         Interpolate (x,y) from values associated with four points.
-
         The four points are a list of four triplets:  (x, y, value).
         The four points can be in any order.  They should form a rectangle.
-
         >>> bilinear_interpolation(12, 5.5,
         ...                        [(10, 4, 100),
         ...                         (20, 4, 200),
