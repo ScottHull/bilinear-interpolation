@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # df = pd.read_fwf("granite.rho_u.txt", header=None)
 # df = pd.read_fwf("dunite.rho_u.txt", header=None)
-df = pd.read_fwf("dunite3.rho_u.txt", header=None)
+df = pd.read_fwf("duniteS.rho_u.txt", header=None)
 
 density = list(df[0])  # load in the full-length density array from df
 energy = list(df[1])  # load in the full-length energy array from df
