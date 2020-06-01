@@ -24,7 +24,7 @@ l = len(density)
 
 for index, i in enumerate(df[1]):
 # for index, i in enumerate(list(df[1])[1:1000]):
-    print("Interpolating: {} / {}".format(index + 1, l))
+#     print("Interpolating: {} / {}".format(index + 1, l))
     d = df[0][index]
     s = df[5][index]
     u = df[1][index]
@@ -33,27 +33,24 @@ for index, i in enumerate(df[1]):
     model = GenericTrilinearInterpolation(var1_array=density, var2_array=energy,
                                                    var3_array=pressure,
                                                    var1=d, var2=u, grid_length=120)
-    try:
-        interp = model.interpolate()
+    interp = model.interpolate()
+    err = abs(interp - p) / interp
+    if d == 3259.86241 and u == 63669.0798:
+        print("***************")
+        print(model.var1)
+        print(model.var2)
+        print("var1 neighbors: {}".format((model.p1, model.p2)))
+        print("var2 neighbors: {}".format((model.s11, model.s12, model.s21, model.s22)))
+        print("var3 neighbors: {}".format((model.u11, model.u12, model.u21, model.u22)))
+        print(u)
         sample_d.append(d)
         sample_s.append(s)
         sample_u.append(u)
         sample_p.append(p)
         interpolated_p.append(interp)
-        err = (interp - p) / p
-        if err > 0.2:
-            print("***************")
-            print(interp.var1)
-            print(interp.var2)
-            print(interp.u1, interp.u2)
-            print("var1 neighbors: {}".format(interp.var1_neighbor_values))
-            print("var2 neighbors: {}".format(interp.var2_neighbor_values))
-            print("var3 neighbors: {}".format(interp.var3_neighbor_values))
-            print(u)
-    except:
-        interpolation_errors.append((d, p))
 
-print("Number successes: {}\nNumber Errors: {}".format(len(interpolated_p), len(interpolation_errors)))
+
+
 fig1 = plt.figure()
 ax1 = fig1.add_subplot(111)
 ax1.scatter(sample_d, sample_p, color='blue', marker="+", label='sample')

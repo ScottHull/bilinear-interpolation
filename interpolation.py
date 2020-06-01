@@ -728,6 +728,8 @@ class GenericTrilinearInterpolation:
                                    restricted_var2_array_upper[upper_var2_neighbors[0]],
                                    restricted_var2_array_upper[upper_var2_neighbors[1]])
 
+
+
         return (var1_neighbor_values, var2_neighbor_values, var3_neighbors)
 
     def interpolate(self):
@@ -753,8 +755,14 @@ class GenericTrilinearInterpolation:
         self.u21 = var3_neighbor_values[2]
         self.u22 = var3_neighbor_values[3]
 
-        self.u1 = self.linear_interpolate(x1=self.s11, x2=self.s12, x=self.var2, q1=self.u11, q2=self.u12)
-        self.u2 = self.linear_interpolate(x1=self.s21, x2=self.s22, x=self.var2, q1=self.u21, q2=self.u22)
+        if self.s11 == self.s12:
+            self.u1 = self.u11
+        else:
+            self.u1 = self.linear_interpolate(x1=self.s11, x2=self.s12, x=self.var2, q1=self.u11, q2=self.u12)
+        if self.s11 == self.s12:
+            self.u2 = self.u21
+        else:
+            self.u2 = self.linear_interpolate(x1=self.s21, x2=self.s22, x=self.var2, q1=self.u21, q2=self.u22)
         u = self.linear_interpolate(x1=self.p1, x2=self.p2, x=self.var1, q1=self.u1, q2=self.u2)
 
 
