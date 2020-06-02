@@ -655,7 +655,7 @@ class GenericTrilinearInterpolation:
                 return (min_distance_index - 2, min_distance_index - 1)
             elif min_distance_index < 0:
                 return (min_distance_index + 1, min_distance_index + 2)
-            return (min_distance_index - 1, min_distance_index + 1)
+            return (min_distance_index, min_distance_index + 1)
 
     def get_var3_neighbor_values(self, s11, s12, s21, s22, lower_var1_restricted_indices,
                                    upper_var1_restricted_indices):

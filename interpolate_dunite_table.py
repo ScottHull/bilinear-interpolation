@@ -6,11 +6,12 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # df = pd.read_fwf("granite.rho_u.txt", header=None)
 # df = pd.read_fwf("dunite.rho_u.txt", header=None)
-df = pd.read_fwf("duniteS.rho_u.txt", header=None)
+df = pd.read_fwf("duniteS2.rho_u.txt", header=None, skiprows=2)
 
 density = list(df[0])  # load in the full-length density array from df
 energy = list(df[1])  # load in the full-length energy array from df
 entropy = list(df[5])  # load in the full-length entropy array from df
+temperature = list(df[2])
 pressure = list(df[3])
 
 sample_d = []
