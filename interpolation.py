@@ -759,11 +759,14 @@ class GenericTrilinearInterpolation:
             self.u1 = self.u11
         else:
             self.u1 = self.linear_interpolate(x1=self.s11, x2=self.s12, x=self.var2, q1=self.u11, q2=self.u12)
-        if self.s11 == self.s12:
+        if self.s21 == self.s22:
             self.u2 = self.u21
         else:
             self.u2 = self.linear_interpolate(x1=self.s21, x2=self.s22, x=self.var2, q1=self.u21, q2=self.u22)
-        u = self.linear_interpolate(x1=self.p1, x2=self.p2, x=self.var1, q1=self.u1, q2=self.u2)
+        if self.p1 == self.p2:
+            u = self.u1
+        else:
+            u = self.linear_interpolate(x1=self.p1, x2=self.p2, x=self.var1, q1=self.u1, q2=self.u2)
 
 
         # print("***************")
